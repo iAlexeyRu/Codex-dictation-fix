@@ -13,9 +13,9 @@ domain="gui/$(id -u)"
 
 if [[ ! -d "$src_app" ]]; then
   if [[ ! -f "$src_script" ]]; then
-    echo "Cannot find app bundle or source script." >&2
-    echo "Missing: $src_app" >&2
-    echo "Missing: $src_script" >&2
+    echo "Не найден готовый .app или исходный AppleScript." >&2
+    echo "Нет файла: $src_app" >&2
+    echo "Нет файла: $src_script" >&2
     exit 1
   fi
   mkdir -p "$package_dir/app"
@@ -63,6 +63,6 @@ launchctl bootstrap "$domain" "$plist"
 open -R "$dst_app"
 open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'
 
-echo "Installed: $dst_app"
+echo "Установлено: $dst_app"
 echo "LaunchAgent: $plist"
-echo "Now add the app to Privacy & Security -> Accessibility."
+echo "Теперь добавьте приложение в Privacy & Security -> Accessibility."

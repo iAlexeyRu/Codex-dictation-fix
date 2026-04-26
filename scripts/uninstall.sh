@@ -10,6 +10,5 @@ launchctl bootout "$domain" "$plist" 2>/dev/null || true
 rm -f "$plist"
 rm -rf "$dst_app"
 
-echo "Uninstalled Codex Russian Dictation Hook."
-echo "Remove it from Privacy & Security -> Accessibility if it is still listed."
-
+echo "Codex Russian Dictation Hook удален."
+echo "Если приложение осталось в Privacy & Security -> Accessibility, удалите его вручную."

@@ -1,64 +1,76 @@
 # Codex Russian Dictation Hook
 
-Small macOS workaround for OpenAI Codex desktop global dictation when the current keyboard layout is Russian.
+## English
 
-## Problem
+English documentation is available here: [README.en.md](README.en.md).
 
-Codex desktop dictation can transcribe speech correctly, but with the Russian keyboard layout selected it may fail to paste the recognized text into the focused field.
+## Что это
 
-Root cause: the current Codex app simulates paste using AppleScript similar to:
+Небольшой macOS-хук для OpenAI Codex Desktop. Он исправляет проблему, когда глобальная диктовка Codex распознает речь, но не вставляет текст в активное поле при включенной русской раскладке клавиатуры.
+
+Хук не меняет `Codex.app` и не патчит бинарники. Он работает рядом с Codex как фоновое приложение.
+
+Upstream issue в OpenAI Codex: https://github.com/openai/codex/issues/19710
+
+## Проблема
+
+Codex Desktop после диктовки временно кладет распознанный текст в clipboard и вызывает paste через AppleScript примерно так:
 
 ```applescript
 tell application "System Events" to keystroke "v" using command down
 ```
 
-That is keyboard-layout dependent. Under the Russian layout, `"v"` is not the physical `V` key, so macOS does not perform `Cmd+V`.
+На английской раскладке это работает как `Cmd+V`. На русской раскладке `"v"` не является физической клавишей `V`, поэтому вставка не происходит.
 
-The layout-independent command is:
+Раскладко-независимый вариант:
 
 ```applescript
 tell application "System Events" to key code 9 using command down
 ```
 
-Upstream issue: https://github.com/openai/codex/issues/19710
+`key code 9` - это физическая клавиша `V` на macOS, поэтому `Command + key code 9` срабатывает как paste независимо от текущей раскладки.
 
-## What This Hook Does
+## Как работает хук
 
-The helper runs in the background and watches `~/.codex/transcription-history.jsonl`.
+Фоновое приложение следит за файлом:
 
-When Codex adds a new dictation transcript and briefly places that transcript in the clipboard, the helper checks whether the active input source is Russian. If it is, the helper sends physical `Cmd+V` via `key code 9`.
+```text
+~/.codex/transcription-history.jsonl
+```
 
-It does not modify Codex.app.
+Когда Codex добавляет новый результат диктовки и на короткое время кладет этот текст в clipboard, хук проверяет текущую раскладку. Если включена русская раскладка, он отправляет физический `Cmd+V` через `key code 9`.
 
-The helper is installed as a background app (`LSUIElement=true`), so it does not appear in the Dock or Cmd-Tab after launch.
+Приложение устанавливается как background app (`LSUIElement=true`), поэтому после запуска не отображается в Dock и Cmd-Tab.
 
-## Install
+## Установка
 
-From a release zip:
+Самый простой вариант - скачать готовый архив из релиза:
 
-1. Unzip the package.
-2. Open Terminal in the package folder.
-3. Run:
+https://github.com/iAlexeyRu/Codex-dictation-fix/releases/latest
+
+Затем:
 
 ```zsh
+unzip CodexRussianDictationHook-1.0.2.zip
+cd CodexRussianDictationHook
 ./scripts/install.sh
 ```
 
-4. macOS System Settings will open. Add and enable:
+После установки macOS откроет настройки. Нужно добавить и включить:
 
 ```text
 /Applications/Codex Russian Dictation Hook.app
 ```
 
-in:
+в разделе:
 
 ```text
 Privacy & Security -> Accessibility
 ```
 
-If the app is already listed, remove it and add it again.
+Если приложение уже есть в списке, удалите его и добавьте заново. Это важно после обновлений, потому что macOS может сбросить доверие к переподписанному `.app`.
 
-From a git clone:
+## Установка из исходников
 
 ```zsh
 git clone https://github.com/iAlexeyRu/Codex-dictation-fix.git
@@ -66,29 +78,54 @@ cd Codex-dictation-fix
 ./scripts/install.sh
 ```
 
-When installing from source, the script builds the helper app with `osacompile`.
+Если готового `.app` нет, installer сам соберет его из `src/codex_ru_dictation_hook.applescript` через `osacompile`.
 
-## Test
+## Проверка
 
-1. Switch macOS keyboard layout to Russian.
-2. Open TextEdit or Notes.
-3. Click into the document so the insertion cursor is active.
-4. Use Codex global dictation.
+1. Переключите macOS на русскую раскладку.
+2. Откройте TextEdit, Notes или любое поле ввода.
+3. Кликните в текстовое поле, чтобы появился активный курсор.
+4. Запустите глобальную диктовку Codex.
 
-Expected: the transcript appears in the text field.
+Ожидаемый результат: распознанный текст вставляется в поле ввода.
 
-## Uninstall
+## Удаление
 
 ```zsh
 ./scripts/uninstall.sh
 ```
 
-Then remove `Codex Russian Dictation Hook.app` from macOS Accessibility settings.
+После этого можно удалить `Codex Russian Dictation Hook.app` из `Privacy & Security -> Accessibility`.
 
-## Files
+## Диагностика
 
-- `app/Codex Russian Dictation Hook.app` - compiled helper app, present in release zip
-- `src/codex_ru_dictation_hook.applescript` - source
-- `scripts/install.sh` - installs app and LaunchAgent
-- `scripts/uninstall.sh` - stops and removes app and LaunchAgent
-- `dist/CodexRussianDictationHook-1.0.1.zip` - ready-to-send install package, present in the repository
+Лог хука:
+
+```text
+~/.codex/log/codex_ru_dictation_hook_app.log
+```
+
+Если в логе есть ошибка вида:
+
+```text
+Отправка нажатий клавиш для «Codex Russian Dictation Hook» не разрешена
+```
+
+значит macOS не выдала Accessibility-доступ. Добавьте приложение в `Privacy & Security -> Accessibility`.
+
+## Состав release zip
+
+- `src/codex_ru_dictation_hook.applescript` - исходник хука
+- `scripts/install.sh` - установка `.app` и LaunchAgent
+- `scripts/uninstall.sh` - остановка и удаление
+- `app/Codex Russian Dictation Hook.app` - готовое приложение внутри release zip
+
+## Состав репозитория
+
+- `README.md` - русская документация
+- `README.en.md` - английская документация
+- `CHANGELOG.md` - история изменений
+- `src/codex_ru_dictation_hook.applescript` - исходник хука
+- `scripts/install.sh` - установка `.app` и LaunchAgent
+- `scripts/uninstall.sh` - остановка и удаление
+- `dist/CodexRussianDictationHook-1.0.2.zip` - готовый архив для установки
