@@ -91,4 +91,4 @@ Then remove `Codex Russian Dictation Hook.app` from macOS Accessibility settings
 - `src/codex_ru_dictation_hook.applescript` - source
 - `scripts/install.sh` - installs app and LaunchAgent
 - `scripts/uninstall.sh` - stops and removes app and LaunchAgent
-- `dist/CodexRussianDictationHook-1.0.zip` - ready-to-send install package, present in the repository
+- `dist/CodexRussianDictationHook-1.0.1.zip` - ready-to-send install package, present in the repository
