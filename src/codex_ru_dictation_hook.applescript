@@ -68,7 +68,7 @@ on parseHistoryLine(lineText)
     "line = os.environ.get('CODEX_DICTATION_JSON', '')" & linefeed & ¬
     "try:" & linefeed & ¬
     "    item = json.loads(line)" & linefeed & ¬
-    "    print(str(item.get('id','')) + '\t' + str(item.get('text','')))" & linefeed & ¬
+    "    print(str(item.get('id','')) + '\\t' + str(item.get('text','')))" & linefeed & ¬
     "except Exception:" & linefeed & ¬
     "    pass"
   try
@@ -99,3 +99,4 @@ on logMessage(messageText)
     do shell script "/bin/mkdir -p " & quoted form of ((POSIX path of (path to home folder)) & ".codex/log") & "; /bin/echo " & quoted form of (((current date) as text) & " " & messageText) & " >> " & quoted form of logPath
   end try
 end logMessage
+

@@ -30,6 +30,8 @@ When Codex adds a new dictation transcript and briefly places that transcript in
 
 It does not modify Codex.app.
 
+The helper is installed as a background app (`LSUIElement=true`), so it does not appear in the Dock or Cmd-Tab after launch.
+
 ## Install
 
 From a release zip:

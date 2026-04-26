@@ -12,3 +12,4 @@ rm -rf "$dst_app"
 
 echo "Uninstalled Codex Russian Dictation Hook."
 echo "Remove it from Privacy & Security -> Accessibility if it is still listed."
+
